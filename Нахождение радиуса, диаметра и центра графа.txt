@@ -1,0 +1,123 @@
+
+
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int SIZE = 9;             // количество вершин графа
+const int INF = 1000;           // условная "бесконечность"
+int       radius = INF;         // радиус графа (бесконечность, т. к. выражается минимумом от эксцентриситета)
+int       diameter;             // диаметр графа
+int       e[SIZE];              // эксцентриситет вершин
+int       lenght[SIZE];           // расстояние от текущей вершины алгоритма дейкстры до вершины n
+int       sig[SIZE][SIZE];      // расстояние от вершины до вершины
+bool      visited[SIZE];        // массив меток (пройденные вершины)
+int       temp;                 // временная переменная для счета длины пути
+int       minindex;
+int       minD;
+bool      centr[SIZE];
+
+int       j;                    // счетчики итераций
+int       i;
+int       k;
+int       n;
+int a[SIZE][SIZE] =             // матрица весов
+{ 
+	{ 0, 1, 2, INF, INF, INF, INF, INF, INF },
+	{ INF, 0, INF, 2, 2, INF, INF, INF, INF },
+	{ INF, INF, 0, 3, INF, 4, INF, INF, INF },
+	{ INF, INF, INF, 0, 1, 2, INF, INF, INF },
+	{ INF, INF, INF, INF, 0, INF, 3, INF, 2 },
+	{ INF, INF, INF, INF, INF, 0, INF, 2, 3 },
+	{ 5, 5, INF, INF, INF, INF, 0, INF, INF },
+	{ 5, INF, 5, INF, INF, INF, INF, 0, INF },
+	{ INF, INF, INF, INF, INF, INF, 3, 4, 0 } };
+
+int dijkstra(int V, int F)            // возвращает крайчайший путь из V в F. Если такого нет, возвращает -1
+{
+	for (i = 0; i < SIZE; i++)
+	{
+		lenght[i] = INF;                // задаем пути до всех точек бесконечными
+		visited[i] = false;           // вершины не разу не посещали
+	}
+
+	lenght[V] = 0;                      // расстояние до элемента V равно 0
+
+	do {
+		minindex = INF;
+		minD = INF;
+		for (i = 0; i < SIZE; i++)            {
+			if ((visited[i] == false) && (lenght[i] < minD))  // Если вершину элемента ещё не обошли и дорога до элемента меньше min
+			{
+				minD = lenght[i];       // Переприсваиваем значения
+				minindex = i;
+			}
+		}
+		if (minindex != INF)
+		{
+			for (i = 0; i<SIZE; i++)  // идем по столбцу массива с ранее известной строкой
+			{
+				//  a[строка][столбец]
+				if (a[minindex][i] > 0)  // если i-тый больше 0 (требование алгоритма Дейкстры)
+				{
+					temp = minD + a[minindex][i]; // считаем новый путь
+					if (temp < lenght[i])           // если новый путь меньше старого
+						lenght[i] = temp;           // переприсваиваем значения
+				}
+			}
+			visited[minindex] = true;             // вершина посещена
+		}
+	} while (minindex != INF);         // пока есть хотя-бы одна непосещенная вершина смежная с текущей, путь до которой меньше найденного
+
+	if (lenght[F] != INF)     // если дистанция не равна бесконечности
+		return lenght[F];     // возвращаем ее значение
+	else
+		return -1;          // иначе — возвращаем маркер -1 (т. е. пути нет)
+}
+
+int main()
+{
+
+	for (j = 0; j < SIZE; j++)  // ищем кратчайшие пути
+	{
+		for (k = 0; k < SIZE; k++)
+		{
+			sig[j][k] = dijkstra(j, k);
+		}
+	}
+
+	for (i = 0; i < SIZE; i++) //ищем эксцентриситет
+	{
+		for (j = 0; j < SIZE; j++)
+		{
+			e[i] = max(e[i], sig[i][j]);
+		}
+	}
+
+	// Нахождение диаметра (максимальный эксцентриситет) и радиуса (минимальный эксцентриситет)
+	for (i = 0; i < SIZE; i++)
+	{
+		radius = min(radius, e[i]);       // возвращает меньшее (либо radius, либо e[i])
+		diameter = max(diameter, e[i]);   // возвращает большее (либо radius, либо e[i])
+	}
+
+	cout << "Diameter: " << diameter << "\n";
+	cout << "Radius: " << radius << "\n";
+	// Нахождение центра   
+	cout << "Center: ";
+	for (i = 0; i < SIZE; i++) {
+		if (e[i] == radius) {
+			centr[i] = true;
+			cout << " V" << i + 1;   // (i+1) т. к. вершины начинаются с единицы
+		}
+	}
+	cout << endl;
+	system("pause");
+	return 0;
+
+
+
+	cout << "\n";
+	system("pause");
+	return 0;
+}
